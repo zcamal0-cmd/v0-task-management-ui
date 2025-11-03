@@ -12,6 +12,8 @@ export interface WorkItem {
   employeeName?: string
   dueDate?: string
   children?: WorkItem[]
+  createdBy?: string
+  activityDate?: string
 }
 
 export interface Group {
@@ -112,6 +114,8 @@ const veisBoard: Board = {
               status: "done",
               commentsCount: 2,
               workItemType: "Task",
+              createdBy: "John Smith",
+              activityDate: "2025-10-29",
             },
             {
               id: "VEIS-101-2",
@@ -121,8 +125,12 @@ const veisBoard: Board = {
               status: "active",
               commentsCount: 1,
               workItemType: "Task",
+              createdBy: "John Smith",
+              activityDate: "2025-10-30",
             },
           ],
+          createdBy: "John Smith",
+          activityDate: "2025-10-25",
         },
         {
           id: "VEIS-102",
@@ -132,6 +140,8 @@ const veisBoard: Board = {
           status: "stuck",
           commentsCount: 3,
           workItemType: "Task",
+          createdBy: "John Smith",
+          activityDate: "2025-10-28",
         },
       ],
     },
@@ -147,6 +157,8 @@ const veisBoard: Board = {
           status: "new",
           commentsCount: 1,
           workItemType: "Feature",
+          createdBy: "John Smith",
+          activityDate: "2025-10-31",
         },
         {
           id: "VEIS-202",
@@ -156,6 +168,8 @@ const veisBoard: Board = {
           status: "new",
           commentsCount: 0,
           workItemType: "Task",
+          createdBy: "John Smith",
+          activityDate: "2025-10-31",
         },
       ],
     },
@@ -171,6 +185,8 @@ const veisBoard: Board = {
           status: "new",
           commentsCount: 2,
           workItemType: "Epic",
+          createdBy: "John Smith",
+          activityDate: "2025-10-31",
         },
         {
           id: "VEIS-302",
@@ -180,6 +196,8 @@ const veisBoard: Board = {
           status: "new",
           commentsCount: 0,
           workItemType: "Feature",
+          createdBy: "John Smith",
+          activityDate: "2025-10-31",
         },
       ],
     },
@@ -205,6 +223,8 @@ const azdocBoard: Board = {
           status: "active",
           commentsCount: 4,
           workItemType: "Task",
+          createdBy: "Mike Chen",
+          activityDate: "2025-10-27",
         },
         {
           id: "AZDOC-102",
@@ -214,6 +234,8 @@ const azdocBoard: Board = {
           status: "done",
           commentsCount: 7,
           workItemType: "Task",
+          createdBy: "John Smith",
+          activityDate: "2025-10-26",
         },
       ],
     },
@@ -229,6 +251,8 @@ const azdocBoard: Board = {
           status: "new",
           commentsCount: 1,
           workItemType: "Task",
+          createdBy: "Mike Chen",
+          activityDate: "2025-10-31",
         },
         {
           id: "AZDOC-202",
@@ -238,6 +262,8 @@ const azdocBoard: Board = {
           status: "new",
           commentsCount: 0,
           workItemType: "Feature",
+          createdBy: "Mike Chen",
+          activityDate: "2025-10-31",
         },
       ],
     },
@@ -253,6 +279,8 @@ const azdocBoard: Board = {
           status: "new",
           commentsCount: 2,
           workItemType: "Feature",
+          createdBy: "John Smith",
+          activityDate: "2025-10-31",
         },
         {
           id: "AZDOC-302",
@@ -262,6 +290,8 @@ const azdocBoard: Board = {
           status: "new",
           commentsCount: 0,
           workItemType: "Feature",
+          createdBy: "John Smith",
+          activityDate: "2025-10-31",
         },
       ],
     },
@@ -288,6 +318,8 @@ const recruitmentBoard: Board = {
           commentsCount: 3,
           employeeName: "Alex Thompson",
           dueDate: "2025-11-10",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-29",
         },
         {
           id: "REC-102",
@@ -297,6 +329,8 @@ const recruitmentBoard: Board = {
           commentsCount: 1,
           employeeName: "Jordan Lee",
           dueDate: "2025-11-08",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-30",
         },
       ],
     },
@@ -312,6 +346,8 @@ const recruitmentBoard: Board = {
           commentsCount: 5,
           employeeName: "Sam Martinez",
           dueDate: "2025-11-15",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
         {
           id: "REC-202",
@@ -321,6 +357,8 @@ const recruitmentBoard: Board = {
           commentsCount: 2,
           employeeName: "Casey Brown",
           dueDate: "2025-11-12",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
       ],
     },
@@ -336,6 +374,8 @@ const recruitmentBoard: Board = {
           commentsCount: 8,
           employeeName: "Morgan Taylor",
           dueDate: "2025-11-05",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
         {
           id: "REC-302",
@@ -345,6 +385,8 @@ const recruitmentBoard: Board = {
           commentsCount: 6,
           employeeName: "Riley Johnson",
           dueDate: "2025-11-03",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
       ],
     },
@@ -370,6 +412,8 @@ const onboardingBoard: Board = {
           commentsCount: 2,
           employeeName: "Morgan Taylor",
           dueDate: "2025-11-06",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
         {
           id: "ONB-102",
@@ -379,6 +423,8 @@ const onboardingBoard: Board = {
           commentsCount: 0,
           employeeName: "Riley Johnson",
           dueDate: "2025-11-07",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
       ],
     },
@@ -394,6 +440,8 @@ const onboardingBoard: Board = {
           commentsCount: 4,
           employeeName: "Morgan Taylor",
           dueDate: "2025-11-04",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
         {
           id: "ONB-202",
@@ -403,6 +451,8 @@ const onboardingBoard: Board = {
           commentsCount: 1,
           employeeName: "Riley Johnson",
           dueDate: "2025-11-05",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
       ],
     },
@@ -418,6 +468,8 @@ const onboardingBoard: Board = {
           commentsCount: 0,
           employeeName: "Morgan Taylor",
           dueDate: "2025-11-10",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
         {
           id: "ONB-302",
@@ -427,6 +479,8 @@ const onboardingBoard: Board = {
           commentsCount: 1,
           employeeName: "Riley Johnson",
           dueDate: "2025-11-08",
+          createdBy: "Lisa Anderson",
+          activityDate: "2025-10-31",
         },
       ],
     },

@@ -9,6 +9,7 @@ import { WorkItemRow } from "@/components/work-item-row"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BoardKanbanView } from "@/components/board-kanban-view"
+import { BoardWorkItemsView } from "@/components/board-work-items-view"
 
 interface BoardTableViewProps {
   board: Board
@@ -25,7 +26,7 @@ export function BoardTableView({
   showEmployeeName = false,
   showDueDate = false,
 }: BoardTableViewProps) {
-  const [view, setView] = useState<"table" | "kanban">("table")
+  const [view, setView] = useState<"table" | "kanban" | "workitems">("table")
   const [collapsedGroups, setCollapsedGroups] = useState<string[]>([])
 
   const toggleGroup = (groupId: string) => {
@@ -35,7 +36,7 @@ export function BoardTableView({
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="p-6">
-        <Tabs value={view} onValueChange={(v) => setView(v as "table" | "kanban")} className="mb-4">
+        <Tabs value={view} onValueChange={(v) => setView(v as "table" | "kanban" | "workitems")} className="mb-4">
           <TabsList className="bg-secondary">
             <TabsTrigger
               value="table"
@@ -48,6 +49,12 @@ export function BoardTableView({
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white"
             >
               Kanban
+            </TabsTrigger>
+            <TabsTrigger
+              value="workitems"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-600 data-[state=active]:to-teal-600 data-[state=active]:text-white"
+            >
+              Work Items
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -130,7 +137,7 @@ export function BoardTableView({
               )
             })}
           </div>
-        ) : (
+        ) : view === "kanban" ? (
           <BoardKanbanView
             board={board}
             showTags={showTags}
@@ -138,6 +145,8 @@ export function BoardTableView({
             showEmployeeName={showEmployeeName}
             showDueDate={showDueDate}
           />
+        ) : (
+          <BoardWorkItemsView />
         )}
       </div>
     </div>
