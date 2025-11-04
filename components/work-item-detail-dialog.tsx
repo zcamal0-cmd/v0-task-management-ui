@@ -24,6 +24,9 @@ import {
   FileText,
   X,
   User,
+  Eye,
+  EyeOff,
+  Link,
 } from "lucide-react"
 import type { WorkItem } from "@/lib/mock-data"
 
@@ -50,6 +53,22 @@ interface Note {
   content: string
   createdBy: string
   createdAt: string
+}
+
+interface LinkedWorkItem {
+  id: string
+  title: string
+  type: string
+  status: string
+}
+
+interface HistoryEntry {
+  id: string
+  user: string
+  userInitials: string
+  action: string
+  timestamp: string
+  details?: string
 }
 
 const mockComments: Comment[] = [
@@ -105,6 +124,69 @@ const mockNotes: Note[] = [
   },
 ]
 
+const mockLinkedItems: LinkedWorkItem[] = [
+  {
+    id: "WI-4521",
+    title: "Update API documentation",
+    type: "Task",
+    status: "In Progress",
+  },
+  {
+    id: "WI-4498",
+    title: "Fix authentication bug",
+    type: "Bug",
+    status: "Done",
+  },
+  {
+    id: "WI-4567",
+    title: "Add unit tests for new features",
+    type: "Task",
+    status: "To Do",
+  },
+]
+
+const mockHistory: HistoryEntry[] = [
+  {
+    id: "h1",
+    user: "Sarah Johnson",
+    userInitials: "SJ",
+    action: "changed status from",
+    timestamp: "2 hours ago",
+    details: "To Do → In Progress",
+  },
+  {
+    id: "h2",
+    user: "Mike Chen",
+    userInitials: "MC",
+    action: "assigned to",
+    timestamp: "5 hours ago",
+    details: "Camal Zeynalli",
+  },
+  {
+    id: "h3",
+    user: "Emily Davis",
+    userInitials: "ED",
+    action: "changed priority from",
+    timestamp: "1 day ago",
+    details: "None → High",
+  },
+  {
+    id: "h4",
+    user: "John Smith",
+    userInitials: "JS",
+    action: "added tag",
+    timestamp: "2 days ago",
+    details: "Backend",
+  },
+  {
+    id: "h5",
+    user: "Camal Zeynalli",
+    userInitials: "CZ",
+    action: "created this work item",
+    timestamp: "3 days ago",
+  },
+]
+
 interface WorkItemDetailDialogProps {
   workItem: WorkItem | null
   open: boolean
@@ -118,6 +200,9 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
   const [attachments] = useState<Attachment[]>(mockAttachments)
   const [notes] = useState<Note[]>(mockNotes)
   const [activeTab, setActiveTab] = useState("comments")
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [linkedItems] = useState<LinkedWorkItem[]>(mockLinkedItems)
+  const [history] = useState<HistoryEntry[]>(mockHistory)
 
   if (!workItem) return null
 
@@ -159,12 +244,25 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
                       <DropdownMenuItem>Create copy of work item</DropdownMenuItem>
-                      <DropdownMenuItem>Link with other work item</DropdownMenuItem>
+                      <DropdownMenuItem>Create linked work item</DropdownMenuItem>
                       <DropdownMenuItem>Create sub work item</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <DialogTitle className="text-xl font-normal">{workItem.title}</DialogTitle>
                 </div>
+                <Button variant="outline" size="sm" onClick={() => setIsFollowing(!isFollowing)} className="gap-2">
+                  {isFollowing ? (
+                    <>
+                      <EyeOff className="h-4 w-4" />
+                      Following
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4" />
+                      Follow
+                    </>
+                  )}
+                </Button>
               </div>
             </DialogHeader>
 
@@ -246,17 +344,14 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
                           />
                           <div className="flex gap-2">
                             <Button size="sm" variant="outline" className="text-xs bg-transparent">
-                              Suggest a reply...
+                              <br />
                             </Button>
                             <Button size="sm" variant="outline" className="text-xs bg-transparent">
-                              Who is working on this...?
+                              <br />
                             </Button>
                             <Button size="sm" variant="outline" className="text-xs bg-transparent">
-                              Status update...
+                              <br />
                             </Button>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Pro tip: press <kbd className="px-1 py-0.5 bg-secondary rounded text-xs">M</kbd> to comment
                           </div>
                         </div>
                       </div>
@@ -265,7 +360,7 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
                     {/* Comments list */}
                     <div className="space-y-4">
                       {comments.map((comment) => (
-                        <div key={comment.id} className="space-y-3">
+                        <div key={comment.id} className="space-y-3 my-3">
                           <div className="flex gap-3">
                             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-sm font-medium shrink-0">
                               {comment.userInitials}
@@ -278,12 +373,26 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
                               <div className="text-sm">{comment.content}</div>
                               <div className="flex items-center gap-3">
                                 <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                                  <ThumbsUp className="h-3 w-3 mr-1" />
-                                  Like
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="lucide lucide-thumbs-up h-3 w-3 mr-1"
+                                  >
+                                    <path d="M7 10v12"></path>
+                                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"></path>
+                                  </svg>
+                                  <path d="M7 10v12"></path>
+                                  <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"></path>
                                 </Button>
                                 <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                                  <Smile className="h-3 w-3 mr-1" />
-                                  React
+                                  <br />
                                 </Button>
                                 <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
                                   Reply
@@ -302,7 +411,7 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
                           {comment.replies && comment.replies.length > 0 && (
                             <div className="ml-11 space-y-3">
                               {comment.replies.map((reply) => (
-                                <div key={reply.id} className="flex gap-3">
+                                <div key={reply.id} className="flex gap-3 bg-card">
                                   <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-medium shrink-0">
                                     {reply.userInitials}
                                   </div>
@@ -345,7 +454,23 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
                   </TabsContent>
 
                   <TabsContent value="history" className="space-y-4 mt-4">
-                    <div className="text-sm text-muted-foreground">History will be shown here</div>
+                    <div className="space-y-3">
+                      {history.map((entry) => (
+                        <div key={entry.id} className="flex gap-3 pb-3 border-b border-border last:border-0">
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-xs font-medium shrink-0">
+                            {entry.userInitials}
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm">
+                              <span className="font-medium">{entry.user}</span>{" "}
+                              <span className="text-muted-foreground">{entry.action}</span>
+                              {entry.details && <span className="font-medium"> {entry.details}</span>}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">{entry.timestamp}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="attachments" className="space-y-6 mt-4">
@@ -406,8 +531,8 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
           </div>
 
           {/* Right side - Details panel */}
-          <div className="w-[380px] bg-secondary/10 overflow-y-auto">
-            <div className="p-6 space-y-6">
+          <div className="w-[380px] overflow-y-auto bg-secondary/10">
+            <div className="p-4 space-y-4 bg-white">
               {/* Status dropdown */}
               <div className="flex items-center gap-2">
                 <DropdownMenu>
@@ -429,40 +554,40 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
               </div>
 
               {/* Details section */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-medium">Details</h3>
+                  <h3 className="font-medium text-sm">Details</h3>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     <Settings className="h-4 w-4" />
                   </Button>
                 </div>
 
                 {/* Assignee */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Assignee</Label>
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Unassigned</span>
                   </div>
-                  <Button variant="link" className="h-auto p-0 text-blue-500 text-sm">
+                  <Button variant="link" className="h-auto p-0 text-blue-500 text-xs">
                     Assign to me
                   </Button>
                 </div>
 
                 {/* Priority */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Priority</Label>
                   <div className="text-sm">None</div>
                 </div>
 
                 {/* Parent */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Parent</Label>
                   <div className="text-sm text-purple-500">DP-2 (Sample) Donation Mana...</div>
                 </div>
 
                 {/* Due date */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Due date</Label>
                   <Button variant="link" className="h-auto p-0 text-sm text-muted-foreground">
                     Add due date
@@ -470,44 +595,23 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
                 </div>
 
                 {/* Labels */}
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Labels</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Tags</Label>
                   <Button variant="link" className="h-auto p-0 text-sm text-muted-foreground">
                     Add labels
                   </Button>
                 </div>
 
-                {/* Team */}
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Team</Label>
-                  <Button variant="link" className="h-auto p-0 text-sm text-muted-foreground">
-                    Add team
-                  </Button>
-                </div>
-
                 {/* Start date */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Start date</Label>
                   <Button variant="link" className="h-auto p-0 text-sm text-muted-foreground">
                     Add date
                   </Button>
                 </div>
 
-                {/* Development */}
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Development</Label>
-                  <div className="space-y-1">
-                    <Button variant="link" className="h-auto p-0 text-sm text-blue-500">
-                      Create branch
-                    </Button>
-                    <Button variant="link" className="h-auto p-0 text-sm text-blue-500 block">
-                      Create commit
-                    </Button>
-                  </div>
-                </div>
-
                 {/* Reporter */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground">Reporter</Label>
                   <div className="flex items-center gap-2">
                     <div className="h-6 w-6 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-xs font-medium">
@@ -517,19 +621,54 @@ export function WorkItemDetailDialog({ workItem, open, onOpenChange }: WorkItemD
                   </div>
                 </div>
 
-                {/* Automation */}
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Automation</Label>
-                  <Button variant="link" className="h-auto p-0 text-sm text-muted-foreground">
-                    Rule executions
-                  </Button>
-                </div>
-
                 {/* Timestamps */}
-                <div className="pt-4 border-t border-border space-y-1">
+                <div className="pt-3 border-t border-border space-y-1">
                   <div className="text-xs text-muted-foreground">Created 25 minutes ago</div>
                   <div className="text-xs text-muted-foreground">Updated 3 minutes ago</div>
                 </div>
+              </div>
+
+              <div className="space-y-3 pt-3 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-sm">Linked items</h3>
+                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  {linkedItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-start gap-2 p-2 border border-border rounded-md hover:bg-secondary/20 transition-colors cursor-pointer"
+                    >
+                      <Link className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs font-mono text-muted-foreground">{item.id}</span>
+                          <span
+                            className={`text-xs px-1.5 py-0.5 rounded ${
+                              item.status === "Done"
+                                ? "bg-green-500/20 text-green-700 dark:text-green-400"
+                                : item.status === "In Progress"
+                                  ? "bg-blue-500/20 text-blue-700 dark:text-blue-400"
+                                  : "bg-gray-500/20 text-gray-700 dark:text-gray-400"
+                            }`}
+                          >
+                            {item.status}
+                          </span>
+                        </div>
+                        <div className="text-xs mt-1 line-clamp-2">{item.title}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{item.type}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <Button variant="outline" size="sm" className="w-full bg-transparent">
+                  <Link className="h-3.5 w-3.5 mr-2" />
+                  Link work item
+                </Button>
               </div>
             </div>
           </div>

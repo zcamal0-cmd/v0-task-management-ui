@@ -3,13 +3,16 @@
 import { cn } from "@/lib/utils"
 
 import { useState } from "react"
-import { ChevronDown, ChevronRight, Plus, MoreHorizontal } from "lucide-react"
-import type { Board } from "@/lib/mock-data"
+import { ChevronDown, ChevronRight, Plus, MoreHorizontal, X } from "lucide-react"
+import type { Board, WorkItem } from "@/lib/mock-data"
 import { WorkItemRow } from "@/components/work-item-row"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BoardKanbanView } from "@/components/board-kanban-view"
 import { BoardWorkItemsView } from "@/components/board-work-items-view"
+import { WorkItemDetailDialog } from "@/components/work-item-detail-dialog"
+import { Input } from "@/components/ui/input"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 interface BoardTableViewProps {
   board: Board
@@ -28,9 +31,39 @@ export function BoardTableView({
 }: BoardTableViewProps) {
   const [view, setView] = useState<"table" | "kanban" | "workitems">("table")
   const [collapsedGroups, setCollapsedGroups] = useState<string[]>([])
+  const [selectedWorkItem, setSelectedWorkItem] = useState<WorkItem | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [creatingInGroup, setCreatingInGroup] = useState<string | null>(null)
+  const [newItemName, setNewItemName] = useState("")
+  const [newItemType, setNewItemType] = useState<"Task" | "Bug" | "Feature" | "Epic">("Task")
 
   const toggleGroup = (groupId: string) => {
     setCollapsedGroups((prev) => (prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]))
+  }
+
+  const handleWorkItemDoubleClick = (workItem: WorkItem) => {
+    setSelectedWorkItem(workItem)
+    setIsDialogOpen(true)
+  }
+
+  const handleAddItem = (groupId: string) => {
+    setCreatingInGroup(groupId)
+    setNewItemName("")
+    setNewItemType("Task")
+  }
+
+  const handleSaveNewItem = () => {
+    if (newItemName.trim()) {
+      // In a real app, this would save to the backend
+      console.log("[v0] Creating new work item:", { name: newItemName, type: newItemType, group: creatingInGroup })
+      setCreatingInGroup(null)
+      setNewItemName("")
+    }
+  }
+
+  const handleCancelNewItem = () => {
+    setCreatingInGroup(null)
+    setNewItemName("")
   }
 
   return (
@@ -87,7 +120,12 @@ export function BoardTableView({
                       </span>
                     </div>
                     <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="sm" className="hover:bg-purple-500/20">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:bg-purple-500/20"
+                        onClick={() => handleAddItem(group.id)}
+                      >
                         <Plus className="h-4 w-4 mr-1" />
                         Add item
                       </Button>
@@ -120,16 +158,66 @@ export function BoardTableView({
                             showWorkItemType={showWorkItemType}
                             showEmployeeName={showEmployeeName}
                             showDueDate={showDueDate}
+                            onDoubleClick={handleWorkItemDoubleClick}
                           />
                         ))}
-                        <tr className="border-b border-border">
-                          <td colSpan={8} className="py-3 px-4">
-                            <button className="text-sm text-muted-foreground hover:text-purple-400 flex items-center gap-2 transition-colors">
-                              <Plus className="h-4 w-4" />
-                              Add item
-                            </button>
-                          </td>
-                        </tr>
+                        {creatingInGroup === group.id ? (
+                          <tr className="border-b border-border bg-secondary/20">
+                            <td colSpan={8} className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  placeholder="Enter work item name..."
+                                  value={newItemName}
+                                  onChange={(e) => setNewItemName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleSaveNewItem()
+                                    if (e.key === "Escape") handleCancelNewItem()
+                                  }}
+                                  className="flex-1 h-9"
+                                  autoFocus
+                                />
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                                      {newItemType}
+                                      <ChevronDown className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => setNewItemType("Task")}>Task</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setNewItemType("Bug")}>Bug</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setNewItemType("Feature")}>
+                                      Feature
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setNewItemType("Epic")}>Epic</DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                                <Button
+                                  size="sm"
+                                  onClick={handleSaveNewItem}
+                                  className="bg-purple-600 hover:bg-purple-700"
+                                >
+                                  Save
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={handleCancelNewItem}>
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          <tr className="border-b border-border">
+                            <td colSpan={8} className="py-3 px-4">
+                              <button
+                                onClick={() => handleAddItem(group.id)}
+                                className="text-sm text-muted-foreground hover:text-purple-400 flex items-center gap-2 transition-colors"
+                              >
+                                <Plus className="h-4 w-4" />
+                                Add item
+                              </button>
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   )}
@@ -149,6 +237,8 @@ export function BoardTableView({
           <BoardWorkItemsView />
         )}
       </div>
+
+      <WorkItemDetailDialog workItem={selectedWorkItem} open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </div>
   )
 }

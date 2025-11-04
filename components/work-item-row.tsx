@@ -13,6 +13,7 @@ interface WorkItemRowProps {
   showEmployeeName?: boolean
   showDueDate?: boolean
   level?: number
+  onDoubleClick?: (workItem: WorkItem) => void
 }
 
 const typeColors: Record<string, string> = {
@@ -37,13 +38,17 @@ export function WorkItemRow({
   showEmployeeName = false,
   showDueDate = false,
   level = 0,
+  onDoubleClick,
 }: WorkItemRowProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const hasChildren = workItem.children && workItem.children.length > 0
 
   return (
     <>
-      <tr className="border-b border-border hover:bg-secondary/50 transition-colors">
+      <tr
+        className="border-b border-border hover:bg-secondary/50 transition-colors cursor-pointer"
+        onDoubleClick={() => onDoubleClick?.(workItem)}
+      >
         <td className="py-3 px-4">
           <div className="flex items-center gap-2" style={{ paddingLeft: `${level * 24}px` }}>
             {hasChildren && (
@@ -138,6 +143,7 @@ export function WorkItemRow({
             showEmployeeName={showEmployeeName}
             showDueDate={showDueDate}
             level={level + 1}
+            onDoubleClick={onDoubleClick}
           />
         ))}
     </>
